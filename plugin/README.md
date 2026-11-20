@@ -53,6 +53,17 @@ La barra del original (relleno de píxeles, porcentaje y botón ×N) sin depende
 
 Cambios sobre el original para esto (en `register.tsx` y `types/index.d.ts`, solo de dibujo y estado propio): el hook de la barra usa el lote cuando no hay flujo reportado, `rowSvg` acepta la figura del tema en lugar del cangrejo y ✕ guarda `bandFrom` en el estado del panel.
 
+## Opciones (versión `1.2.1-seguro.4`)
+
+| Opción | Valores | Qué hace |
+| --- | --- | --- |
+| `estilo` | `cerveza` (defecto), `boxeador`, `cangrejo` | Tema de las figuras. |
+| `barra` | `si` (defecto), `no` | Muestra u oculta siempre la barra sobre el prompt. |
+| `autoOpen` | `any` (defecto), `savvy`, `never` | `any`: el panel se abre solo con cada lote nuevo de subagentes (si lo cerraste, vuelve con el siguiente); `never`: solo se abre con ×N o `/agents-info`. |
+| `language` | `auto`, `en`, `ru`, `he` | Idioma del panel. |
+
+Se cambian como el tema, por ejemplo `cmd /c 'echo {"barra":"no"}| claude plugin configure savvy-progress-customized@savvy-progress-customized --values-stdin'` (las opciones que no pongas conservan su valor).
+
 ## Qué puede hacer el mod
 
 Solo lo que expone la API de Claude Code; un mod no tiene `fetch`, Node ni DOM. Este usa:

@@ -216,7 +216,7 @@ const fitText = (s: string, size: number, maxW: number): string => {
 
 // Sin savvy-flow nadie reporta un flujo: la barra cuenta el lote actual, los subagentes
 // desde la última vez que no corría ninguno (y desde que se ocultó con ✕).
-const batchFlow = (list: AgentRun[], from: number): Flow | null => {
+const batchOf = (list: AgentRun[], from: number): AgentRun[] => {
   const sorted = list.filter(a => a.startedAt >= from).sort((a, b) => a.startedAt - b.startedAt)
   let start = 0
   let busy = -Infinity
@@ -224,7 +224,11 @@ const batchFlow = (list: AgentRun[], from: number): Flow | null => {
     if (a.startedAt > busy) start = i
     busy = a.status === 'running' ? Infinity : Math.max(busy, a.endedAt ?? a.startedAt)
   })
-  const batch = sorted.slice(start)
+  return sorted.slice(start)
+}
+
+const batchFlow = (list: AgentRun[], from: number): Flow | null => {
+  const batch = batchOf(list, from)
   if (!batch.length) return null
   const done = batch.filter(a => a.status !== 'running').length
   return { title: tr().pane, total: batch.length, done, running: batch.length - done, phase: 'delegate', isFinished: done === batch.length, tasks: [] }
@@ -859,11 +863,12 @@ export const register: Register = (on, options) => {
       return [...list.filter(a => a.id !== run.id), run].slice(-200)
     })
     await update($, now, () => at)
-    if (e.subagentType.startsWith('savvy-')) {
+    if (options.autoOpen !== 'never' && e.subagentType.startsWith('savvy-')) {
       const f = await read($, flow)
       await autoOpen($, f && !f.isFinished ? f.title : 'savvy-flow')
     } else if (options.autoOpen === 'any') {
-      await autoOpen($, 'any-agent')
+      // Una vez por lote: si se cerró, vuelve cuando arranca el lote siguiente.
+      await autoOpen($, `lote-${batchOf(await read($, agents), 0)[0]?.startedAt ?? 0}`)
     }
     return started
   })
@@ -1114,7 +1119,8 @@ export const register: Register = (on, options) => {
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    if (e.props.hasSurvey) return next(e)
+    // La opción `barra` en `no` la apaga del todo; el panel sigue con ×N y /agents-info.
+    if (e.props.hasSurvey || options.barra === 'no') return next(e)
     const list = await read($, agents)
     const p: Panel = await read($, panel)
     const at = await read($, now)

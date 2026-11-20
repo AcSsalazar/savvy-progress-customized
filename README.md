@@ -33,7 +33,22 @@ En la app de escritorio, donde `/plugin` no está disponible: botón **+** junto
 ## Uso
 
 - **Barra sobre el prompt:** muestra el lote de subagentes en curso (`Agents · Tasks 2/3 · 67%`) con el relleno de píxeles del original. **×N** abre o cierra el panel con un clic; **✕** la oculta hasta que arranque otro subagente.
-- `/agents-info` abre o cierra el panel; `/agents-info open` lo trae al frente. Se abre solo con el primer subagente de la sesión.
+- `/agents-info` abre o cierra el panel; `/agents-info open` lo trae al frente. Se abre solo con cada lote nuevo de subagentes: si lo cierras, vuelve con el lote siguiente.
+
+### Opciones
+
+| Opción | Valores | Qué hace |
+| --- | --- | --- |
+| `estilo` | `cerveza` (defecto), `boxeador`, `cangrejo` | Tema de las figuras (ver [Cambiar de tema](#cambiar-de-tema)). |
+| `barra` | `si` (defecto), `no` | Muestra u oculta siempre la barra sobre el prompt. El panel sigue disponible con `/agents-info`. |
+| `autoOpen` | `any` (defecto), `savvy`, `never` | `any`: el panel se abre solo con cada lote nuevo de subagentes; `savvy`: solo con trabajadores `savvy-*`; `never`: solo se abre con ×N o `/agents-info`. |
+| `language` | `auto` (defecto), `en`, `ru`, `he` | Idioma del panel. |
+
+Todas se cambian igual que el tema, con `claude plugin configure`; las que no pongas conservan su valor. Por ejemplo, para apagar la barra:
+
+```
+cmd /c 'echo {"barra":"no"}| claude plugin configure savvy-progress-customized@savvy-progress-customized --values-stdin'
+```
 - El tema es uno para todo el panel: `cerveza` (por defecto), `boxeador` o `cangrejo`. Ver [Cambiar de tema](#cambiar-de-tema).
 
 | Tema | Qué indica cada cosa |

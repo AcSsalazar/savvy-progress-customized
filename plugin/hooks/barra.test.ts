@@ -99,3 +99,34 @@ test('barra: ✕ la oculta hasta que arranca otro subagente, que empieza un lote
   expect(await term.find({ type: 'Text', text: /Tasks 0\/1/ })).toBeDefined()
   await term.unmount()
 })
+
+test('barra: con la opción barra en no no aparece nunca', { options: { barra: 'no' } }, async ($, on) => {
+  engine(on, [], [])
+  await $.session.start({ source: 'startup', cwd: '/repo', surface: 'desktop', isInteractive: true } as never)
+  await spawn($, 'Uno')
+  const { ui, svg } = await bandSvg($)
+  expect(svg).toBeUndefined()
+  await ui.unmount()
+})
+
+test('panel: se reabre solo con cada lote nuevo, no con cada subagente del mismo lote', async ($, on) => {
+  const opened: string[] = []
+  const clock = engine(on, opened, [])
+  await $.session.start({ source: 'startup', cwd: '/repo', surface: 'desktop', isInteractive: true } as never)
+  await spawn($, 'Uno')
+  await spawn($, 'Dos')
+  expect(opened).toEqual(['savvy-agents'])
+  await finish($, 'a1')
+  await finish($, 'a2')
+  await clock.advance(5000)
+  await spawn($, 'Tres')
+  expect(opened).toEqual(['savvy-agents', 'savvy-agents'])
+})
+
+test('panel: con autoOpen never no se abre solo', { options: { autoOpen: 'never' } }, async ($, on) => {
+  const opened: string[] = []
+  engine(on, opened, [])
+  await $.session.start({ source: 'startup', cwd: '/repo', surface: 'desktop', isInteractive: true } as never)
+  await spawn($, 'Uno')
+  expect(opened).toEqual([])
+})

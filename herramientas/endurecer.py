@@ -135,7 +135,7 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
     edit(R, "const rowSvg = (f: Flow, W: number, isWorking: boolean): string => {",
          "// Sin savvy-flow nadie reporta un flujo: la barra cuenta el lote actual, los subagentes\n"
          "// desde la última vez que no corría ninguno (y desde que se ocultó con ✕).\n"
-         "const batchFlow = (list: AgentRun[], from: number): Flow | null => {\n"
+         "const batchOf = (list: AgentRun[], from: number): AgentRun[] => {\n"
          "  const sorted = list.filter(a => a.startedAt >= from).sort((a, b) => a.startedAt - b.startedAt)\n"
          "  let start = 0\n"
          "  let busy = -Infinity\n"
@@ -143,7 +143,10 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
          "    if (a.startedAt > busy) start = i\n"
          "    busy = a.status === 'running' ? Infinity : Math.max(busy, a.endedAt ?? a.startedAt)\n"
          "  })\n"
-         "  const batch = sorted.slice(start)\n"
+         "  return sorted.slice(start)\n"
+         "}\n\n"
+         "const batchFlow = (list: AgentRun[], from: number): Flow | null => {\n"
+         "  const batch = batchOf(list, from)\n"
          "  if (!batch.length) return null\n"
          "  const done = batch.filter(a => a.status !== 'running').length\n"
          "  return { title: tr().pane, total: batch.length, done, running: batch.length - done, phase: 'delegate', isFinished: done === batch.length, tasks: [] }\n"
@@ -171,7 +174,8 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
     edit(R, "${CRAB_CSS}${crab(rx(W - CRAB_W + 1, crabW), 0, 'other', false, isWorking, 0.8, rtl)}",
          "${figure ?? `${CRAB_CSS}${crab(rx(W - CRAB_W + 1, crabW), 0, 'other', false, isWorking, 0.8, rtl)}`}")
     edit(R, "    const f = await read($, flow)\n    if (f === null || e.props.hasSurvey) return next(e)\n",
-         "    if (e.props.hasSurvey) return next(e)\n"
+         "    // La opción `barra` en `no` la apaga del todo; el panel sigue con ×N y /agents-info.\n"
+         "    if (e.props.hasSurvey || options.barra === 'no') return next(e)\n"
          "    const list = await read($, agents)\n"
          "    const p: Panel = await read($, panel)\n"
          "    const at = await read($, now)\n"
@@ -179,6 +183,13 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
          "    if (f === null) return next(e)\n")
     edit(R, "    const list = await read($, agents)\n    const crew = list.length", "    const crew = list.length")
     edit(R, "        onPress={() => update($, flow, () => null)}\n", "        onPress={() => void dismissBand($)}\n")
+    # 12. El panel se reabre solo con cada lote nuevo (autoOpen any), no una vez por sesión;
+    #     autoOpen never no lo abre nunca solo.
+    edit(R, "    if (e.subagentType.startsWith('savvy-')) {\n      const f = await read($, flow)\n",
+         "    if (options.autoOpen !== 'never' && e.subagentType.startsWith('savvy-')) {\n      const f = await read($, flow)\n")
+    edit(R, "      await autoOpen($, 'any-agent')\n",
+         "      // Una vez por lote: si se cerró, vuelve cuando arranca el lote siguiente.\n"
+         "      await autoOpen($, `lote-${batchOf(await read($, agents), 0)[0]?.startedAt ?? 0}`)\n")
     edit(R, "source={rowSvg(f, width, isWorking)}", "source={rowSvg(f, width, isWorking, bandFigure(list, f, width, at))}")
 
 

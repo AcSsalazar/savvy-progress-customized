@@ -1,6 +1,6 @@
 {
   "name": "savvy-progress-customized",
-  "version": "1.2.1-seguro.3",
+  "version": "1.2.1-seguro.4",
   "description": "Copia endurecida de savvy-progress 1.2.1: panel de subagentes (/agents-info) con figuras animadas en pixel art (cerveza, boxeador o el cangrejo original). Solo observa: sin herramientas para el modelo y sin reescribir prompts.",
   "author": {
     "name": "johnnyvizz",
@@ -23,12 +23,13 @@
     },
     "autoOpen": {
       "type": "string",
-      "title": "Open the agents panel",
-      "description": "any: when any subagent starts (once per session); savvy: only when a savvy-flow worker starts",
+      "title": "Abrir el panel solo",
+      "description": "any: cada vez que arranca un lote nuevo de subagentes (si lo cerraste, vuelve con el siguiente lote); savvy: solo con trabajadores savvy-*; never: nunca, se abre con ×N o /agents-info",
       "default": "any",
       "options": [
         "any",
-        "savvy"
+        "savvy",
+        "never"
       ]
     },
     "estilo": {
@@ -40,6 +41,16 @@
         "cerveza",
         "boxeador",
         "cangrejo"
+      ]
+    },
+    "barra": {
+      "type": "string",
+      "title": "Barra sobre el prompt",
+      "description": "si: muestra el lote de subagentes con su progreso y el botón ×N; no: la oculta siempre (el panel sigue con /agents-info)",
+      "default": "si",
+      "options": [
+        "si",
+        "no"
       ]
     }
   },

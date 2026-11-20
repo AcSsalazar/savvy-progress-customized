@@ -55,7 +55,7 @@ test('barra: aparece con el lote, cuenta los terminados y ×N abre y cierra el p
   await spawn($, 'Dos')
   ;({ ui, svg } = await bandSvg($))
   expect(svg).toContain('Tasks 0/2')
-  expect(svg).toContain('data-estilo="cerveza"')
+  expect(svg).toContain('data-estilo="boxeador"')
   expect((await ui.find({ key: 'savvy-agents' }))?.props.label).toBe('×2')
   await ui.press({ key: 'savvy-agents' })
   await ui.unmount()

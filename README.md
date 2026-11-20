@@ -4,15 +4,19 @@ Panel de subagentes para [Claude Code](https://claude.com/claude-code) con figur
 
 Es una copia endurecida de [savvy-progress](https://github.com/johnnyvizz/claude-kit/tree/main/plugins/savvy-progress) de johnnyvizz (MIT): solo observa, no da herramientas al modelo ni reescribe prompts.
 
-**Trae dos temas, y se elige uno para todo el panel:** `cerveza` (por defecto) y `boxeador`, además de `cangrejo`, el dibujo original del autor. Ver [Cambiar de tema](#cambiar-de-tema).
+**Trae tres temas, y se elige uno para todo el panel:** `boxeador` (por defecto), `cerveza` y `minero`, además de `cangrejo`, el dibujo original del autor. Ver [Cambiar de tema](#cambiar-de-tema).
 
-**Tema `cerveza`** (por defecto)
+**Tema `boxeador`** (por defecto)
+
+![Tema boxeador](docs/boxeador.gif)
+
+**Tema `cerveza`**
 
 ![Tema cerveza](docs/cerveza.gif)
 
-**Tema `boxeador`**
+**Tema `minero`**
 
-![Tema boxeador](docs/boxeador.gif)
+![Tema minero](docs/minero.gif)
 
 ## Instalar
 
@@ -39,7 +43,7 @@ En la app de escritorio, donde `/plugin` no está disponible: botón **+** junto
 
 | Opción | Valores | Qué hace |
 | --- | --- | --- |
-| `estilo` | `cerveza` (defecto), `boxeador`, `cangrejo` | Tema de las figuras (ver [Cambiar de tema](#cambiar-de-tema)). |
+| `estilo` | `boxeador` (defecto), `cerveza`, `minero`, `cangrejo` | Tema de las figuras (ver [Cambiar de tema](#cambiar-de-tema)). |
 | `barra` | `si` (defecto), `no` | Muestra u oculta siempre la barra sobre el prompt. El panel sigue disponible con `/agents-info`. |
 | `autoOpen` | `any` (defecto), `savvy`, `never` | `any`: el panel se abre solo con cada lote nuevo de subagentes; `savvy`: solo con trabajadores `savvy-*`; `never`: solo se abre con ×N o `/agents-info`. |
 | `historial` | `sesion` (defecto), `lote` | `sesion`: el panel acumula todos los subagentes de la sesión, con Terminados plegable (como el original); `lote`: muestra solo el lote actual y empieza limpio con cada lote nuevo. |
@@ -56,12 +60,13 @@ cmd /c 'echo {"barra":"no"}| claude plugin configure savvy-progress-customized@s
 | --- | --- |
 | Cerveza | Recipiente = tipo de agente (Explore vaso, Plan pinta, general jarra, otro jarra tradicional). Cerveza = modelo (Haiku rubia, Sonnet roja, Opus negra, Fable dorada, otro trigo). Nivel: se llena rápido al principio y va frenando (unas 3 peticiones al modelo, media jarra); al terminar queda llena y desbordando, aunque la tarea haya sido corta; si falla queda vacía, gris y rajada. |
 | Boxeador | Ejercicio = orden de llegada (cuerda, pera, saco, flexiones, abdominales, correr, pesas). Pantaloneta = modelo (Haiku verde, Sonnet azul, Opus morada, Fable dorada, otro gris). Banda = tipo de agente. ×N = peticiones al modelo. Suda con el contexto por encima del 70 %. |
+| Minero | Bloque = modelo (Haiku piedra, Sonnet hierro, Opus oro, Fable diamante, otro tierra). Camisa = tipo de agente. Pica en bucle mientras trabaja; se queda quieto al terminar. |
 
 Las animaciones duran 1 s por ciclo, se atan al reloj para seguir fluidas aunque el panel se redibuje cada segundo, y se detienen con `prefers-reduced-motion`.
 
 ## Cambiar de tema
 
-El tema es la opción `estilo` del plugin y acepta `cerveza` (por defecto), `boxeador` o `cangrejo`. Hay cuatro formas de cambiarlo:
+El tema es la opción `estilo` del plugin y acepta `boxeador` (por defecto), `cerveza`, `minero` o `cangrejo`. Hay cuatro formas de cambiarlo:
 
 1. **Con un comando, desde cualquier terminal** (también la terminal integrada de la app de escritorio). Es la más cómoda:
 
@@ -94,7 +99,7 @@ El tema es la opción `estilo` del plugin y acepta `cerveza` (por defecto), `box
 
    Si `pluginConfigs` ya existe, agrega solo la entrada del plugin. La clave es el nombre completo `plugin@marketplace`, el mismo que aparece en `enabledPlugins`. Si el panel no cambia, abre una sesión nueva.
 
-Un valor distinto de `cerveza`, `boxeador` o `cangrejo` se ignora y el panel vuelve a `cerveza`.
+Un valor distinto de `boxeador`, `cerveza`, `minero` o `cangrejo` se ignora y el panel vuelve a `boxeador`.
 
 ## Seguridad
 

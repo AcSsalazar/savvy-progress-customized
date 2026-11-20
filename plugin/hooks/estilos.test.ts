@@ -2,7 +2,7 @@ import { expect, mock, test } from 'claude-code/testing'
 import type { Engine } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
-// Un solo tema para todo el panel: cerveza (por defecto), boxeador o el cangrejo original.
+// Un solo tema para todo el panel: boxeador (por defecto), cerveza, minero o el cangrejo original.
 
 const PLUGIN = 'savvy-progress-customized'
 const pane = { title: '', isFocused: false, bodyColumns: 60, placement: 'dock', scroll: { offset: 0, bodyRows: 30 }, view: {} } as const
@@ -31,7 +31,7 @@ const rows = async ($: Engine) => {
 
 const start = ($: Engine) => $.session.start({ source: 'startup', cwd: '/repo', surface: 'desktop', isInteractive: true } as never)
 
-test('por defecto todas las filas son cerveza, animadas y dentro del límite del motor', async ($, on) => {
+test('estilo cerveza: todas las filas son cerveza, animadas y dentro del límite del motor', { options: { estilo: 'cerveza' } }, async ($, on) => {
   engine(on)
   await start($)
   await spawn($, 'Explore', 'Primera tarea', 'claude-haiku-5-5')
@@ -46,7 +46,7 @@ test('por defecto todas las filas son cerveza, animadas y dentro del límite del
   }
 })
 
-test('estilo boxeador: todas las filas son boxeador con ×N, sin scripts ni enlaces en el SVG', { options: { estilo: 'boxeador' } }, async ($, on) => {
+test('por defecto todas las filas son boxeador con ×N, sin scripts ni enlaces en el SVG', async ($, on) => {
   engine(on)
   await start($)
   await spawn($, 'Explore', 'Uno', 'claude-haiku-5-5')
@@ -70,4 +70,18 @@ test('estilo cangrejo: vuelve al dibujo original', { options: { estilo: 'cangrej
   const row = (await rows($)).find(s => s.includes('Pirata'))
   expect(row).toContain('c-explore run')
   expect(row).not.toContain('data-estilo=')
+})
+
+test('estilo minero: todas las filas son minero, animadas y dentro del límite del motor', { options: { estilo: 'minero' } }, async ($, on) => {
+  engine(on)
+  await start($)
+  await spawn($, 'Explore', 'Pica uno', 'claude-opus-5-5')
+  await spawn($, 'Plan', 'Pica dos', 'claude-fable-5-1')
+  const list = (await rows($)).filter(s => s.includes('Pica'))
+  expect(list).toHaveLength(2)
+  for (const s of list) {
+    expect(s).toContain('data-estilo="minero"')
+    expect(s).toContain('animation:sf6')
+    expect(s.length).toBeLessThan(MAX_SVG)
+  }
 })

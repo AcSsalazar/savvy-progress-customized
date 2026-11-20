@@ -5,12 +5,13 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { boxerFrame, beerFrame, BW, BH, CW, CH, BEERS, SHORTS, BANDS, EXERCISE_ORDER, CONTAINER_OF } from '../plugin/hooks/estilos.ts'
+import { boxerFrame, beerFrame, minerFrame, BW, BH, CW, CH, MH, BEERS, SHORTS, BANDS, MATERIALS, SHIRTS, EXERCISE_ORDER, CONTAINER_OF } from '../plugin/hooks/estilos.ts'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = path.join(ROOT, 'docs')
 const BG = [241, 239, 233]
-const SCALE = 3, CELL_W = 44, CELL_H = 38
+const SCALE = 3, CELL_W = 44
+let TILE_H = 34
 
 const rgb = col => {
   if (col.startsWith('#')) { const n = parseInt(col.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255] }
@@ -58,12 +59,13 @@ function gif(W, H, frames, palette, delay) {
 
 // Una hoja de celdas (cada una con su tamaño) por cuadro, escalada sin suavizado.
 function sheet(cols, rows, cells) {
+  const CELL_H = TILE_H + 4
   const W = cols * CELL_W + 4, H = rows * CELL_H + 4
   const px = Array.from({ length: W * H }, () => [255, 255, 255])
   for (const { col, row, colors, w, h } of cells) {
     const ox = 4 + col * CELL_W, oy = 4 + row * CELL_H
-    for (let y = 0; y < 34; y++) for (let x = 0; x < 40; x++) px[(oy + y) * W + ox + x] = BG
-    const dx = Math.floor((40 - w) / 2), dy = Math.floor((34 - h) / 2)
+    for (let y = 0; y < TILE_H; y++) for (let x = 0; x < 40; x++) px[(oy + y) * W + ox + x] = BG
+    const dx = Math.floor((40 - w) / 2), dy = Math.floor((TILE_H - h) / 2)
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const c = colors[y * w + x]; if (c) px[(oy + dy + y) * W + ox + dx + x] = rgb(c) }
   }
   return { W, H, px }
@@ -112,3 +114,9 @@ writeGif(path.join(OUT, 'boxeador.gif'), 4, 2, Array.from({ length: 12 }, (_, t)
     col: i % 4, row: Math.floor(i / 4), w: BW, h: BH,
     colors: boxerFrame(ex, (t % 6) / 6, { shorts: SHORTS[models[i]], band: BANDS[types[i]] }, false),
   }))), 17)
+
+// Minero: un bloque por modelo, camisa por tipo; lienzo más alto para el pico levantado.
+TILE_H = MH
+const miners = [['otro', 'otro'], ['haiku', 'explore'], ['sonnet', 'plan'], ['opus', 'general'], ['fable', 'explore']]
+writeGif(path.join(OUT, 'minero.gif'), 5, 1, Array.from({ length: 12 }, (_, t) =>
+  miners.map(([model, type], col) => ({ col, row: 0, w: BW, h: MH, colors: minerFrame(t % 6, MATERIALS[model], SHIRTS[type]) }))), 17)

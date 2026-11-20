@@ -1,7 +1,7 @@
 {
   "name": "savvy-progress-customized",
-  "version": "1.2.1-seguro.5",
-  "description": "Copia endurecida de savvy-progress 1.2.1: panel de subagentes (/agents-info) con figuras animadas en pixel art (cerveza, boxeador o el cangrejo original). Solo observa: sin herramientas para el modelo y sin reescribir prompts.",
+  "version": "1.2.1-seguro.6",
+  "description": "Copia endurecida de savvy-progress 1.2.1: panel de subagentes (/agents-info) con figuras animadas en pixel art: boxeador (por defecto), cerveza, minero o el cangrejo original. Solo observa: sin herramientas para el modelo y sin reescribir prompts.",
   "author": {
     "name": "johnnyvizz",
     "url": "https://github.com/johnnyvizz"
@@ -35,11 +35,12 @@
     "estilo": {
       "type": "string",
       "title": "Estilo de las figuras",
-      "description": "Un tema para todo el panel. cerveza: recipiente según el tipo de agente y cerveza según el modelo; boxeador: ejercicio por orden, pantaloneta según el modelo; cangrejo: el dibujo original",
-      "default": "cerveza",
+      "description": "Un tema para todo el panel. boxeador: ejercicio por orden, pantaloneta según el modelo; cerveza: recipiente según el tipo y cerveza según el modelo; minero: bloque según el modelo y camisa según el tipo; cangrejo: el dibujo original",
+      "default": "boxeador",
       "options": [
-        "cerveza",
         "boxeador",
+        "cerveza",
+        "minero",
         "cangrejo"
       ]
     },

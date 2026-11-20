@@ -91,7 +91,7 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
          "import { SPRITE_CSS, estiloOf, sprite } from './estilos'\n"
          "import type { Estilo } from './estilos'\n")
     edit(R, "let lang: Lang = 'en'\n",
-         "let lang: Lang = 'en'\n// El estilo de las figuras: la opción `estilo`, fijada en session.start como `lang`.\nlet estilo: Estilo = 'cerveza'\n")
+         "let lang: Lang = 'en'\n// El estilo de las figuras: la opción `estilo`, fijada en session.start como `lang`.\nlet estilo: Estilo = 'boxeador'\n")
     edit(R, "${PANE_CSS}${CRAB_CSS}${body}</svg>`", "${PANE_CSS}${CRAB_CSS}${SPRITE_CSS}${body}</svg>`")
     edit(R, "const agentSvg = (W: number, a: AgentRun, at: number): string => {",
          "// La figura de un agente: cerveza o boxeador según el estilo; el cangrejo original si el estilo lo pide.\n"

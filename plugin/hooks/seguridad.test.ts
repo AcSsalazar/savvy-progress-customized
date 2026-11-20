@@ -63,7 +63,7 @@ test('seguridad: el prompt de un subagente savvy-* y de cualquier otro pasa sin 
   expect(seen.prompts).toEqual(['brief exacto', 'otro brief'])
 })
 
-test('panel: se abre solo con cualquier subagente y dibuja cangrejos en el escritorio', async ($, on) => {
+test('panel: se abre solo con cualquier subagente; en el escritorio dibuja la figura y en la terminal, texto', async ($, on) => {
   const seen = { tools: [] as string[], commands: [] as string[], opened: [] as string[], prompts: [] as string[] }
   engine(on, seen)
   await start($)
@@ -74,7 +74,7 @@ test('panel: se abre solo con cualquier subagente y dibuja cangrejos en el escri
   const rows = (await desk.findAll({ type: 'Svg' })).map(el => String(el.props.source))
   const card = rows.find(s => s.includes('Tarea Explore'))
   expect(card).toBeDefined()
-  expect(card).toContain('c-explore run')
+  expect(card).toContain('data-estilo="cerveza"')
   expect(card).toContain('prefers-reduced-motion')
   await desk.unmount()
 

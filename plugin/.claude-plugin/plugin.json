@@ -1,6 +1,6 @@
 {
   "name": "savvy-progress-customized",
-  "version": "1.2.1-seguro.6",
+  "version": "1.2.1-seguro.7",
   "description": "Copia endurecida de savvy-progress 1.2.1: panel de subagentes (/agents-info) con figuras animadas en pixel art: boxeador (por defecto), cerveza, minero o el cangrejo original. Solo observa: sin herramientas para el modelo y sin reescribir prompts.",
   "author": {
     "name": "johnnyvizz",

@@ -88,7 +88,7 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
     # 10. Estilos propios (cerveza o boxeador) desde hooks/estilos.ts, elegidos con la opción `estilo`.
     edit(R, "import type { AgentRun, Flow, Panel, PlannedTask } from '../types'\n",
          "import type { AgentRun, Flow, Panel, PlannedTask } from '../types'\n"
-         "import { SPRITE_CSS, estiloOf, sprite } from './estilos'\n"
+         "import { SPRITE_CSS, estiloOf, sprite, typeColor } from './estilos'\n"
          "import type { Estilo } from './estilos'\n")
     edit(R, "let lang: Lang = 'en'\n",
          "let lang: Lang = 'en'\n// El estilo de las figuras: la opción `estilo`, fijada en session.start como `lang`.\nlet estilo: Estilo = 'boxeador'\n")
@@ -197,6 +197,19 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
          "    const all = await read($, agents)\n"
          "    const list = options.historial === 'lote' ? batchOf(all, 0) : all\n"
          "    const f = await read($, flow)\n")
+    # 14. Barra de cada fila sin la herramienta step: avance estimado por peticiones al modelo
+    #     (no el % de contexto en gris) y color del tipo de agente; rojo si falló.
+    edit(R, "  if (a.stepTotal) return Math.min(1, (a.stepDone ?? 0) / a.stepTotal)\n  return null\n}",
+         "  if (a.stepTotal) return Math.min(1, (a.stepDone ?? 0) / a.stepTotal)\n"
+         "  // Sin pasos reportados: avance estimado por peticiones al modelo, rápido al inicio y frenando.\n"
+         "  return 1 - Math.exp(-a.steps / 4.5)\n}")
+    edit(R, "const agentSvg = (W: number, a: AgentRun, at: number, order = 0): string => {",
+         "// Color de la fila: el del nivel savvy-*, o el del tipo de agente; rojo si falló.\n"
+         "const rowColor = (a: AgentRun): string =>\n"
+         "  a.status === 'failed' ? '#D0453F' : tierOf(a.type) === 'other' ? typeColor(a.type) : colorOf(tierOf(a.type))\n\n"
+         "const agentSvg = (W: number, a: AgentRun, at: number, order = 0): string => {")
+    edit(R, "  const tier = tierOf(a.type)\n  const color = colorOf(tier)\n", "  const tier = tierOf(a.type)\n  const color = rowColor(a)\n")
+    edit(R, "      const tier = tierOf(a.type)\n      const color = colorOf(tier)\n", "      const tier = tierOf(a.type)\n      const color = rowColor(a)\n")
     edit(R, "source={rowSvg(f, width, isWorking)}", "source={rowSvg(f, width, isWorking, bandFigure(list, f, width, at))}")
 
 

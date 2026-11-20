@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { AgentRun, Flow, Panel, PlannedTask } from '../types'
-import { SPRITE_CSS, estiloOf, sprite } from './estilos'
+import { SPRITE_CSS, estiloOf, sprite, typeColor } from './estilos'
 import type { Estilo } from './estilos'
 
 const flow = atom({ plugin: 'savvy-progress-customized', key: 'flow' } as const, null)
@@ -672,7 +672,8 @@ const headerHeight = (title: string): number => (title ? 72 : 44)
 const progressOf = (a: AgentRun): number | null => {
   if (a.status === 'done') return 1
   if (a.stepTotal) return Math.min(1, (a.stepDone ?? 0) / a.stepTotal)
-  return null
+  // Sin pasos reportados: avance estimado por peticiones al modelo, rápido al inicio y frenando.
+  return 1 - Math.exp(-a.steps / 4.5)
 }
 
 const ctxOf = (a: AgentRun): number => (a.contextMax ? Math.min(100, Math.round((a.contextTokens / a.contextMax) * 100)) : 0)
@@ -687,10 +688,14 @@ const rowSprite = (W: number, a: AgentRun, at: number, order: number): string =>
   sprite(spriteIn(a, order), estilo, at, { x: mx(W, 0, TX - 4), y: 4, w: TX - 4, h: 58, scale: 1.5, rtl: isRtl(), animate: true }) ??
   rowCrab(W, 0, 14, costumeOf(a.type), false, a.status === 'running')
 
+// Color de la fila: el del nivel savvy-*, o el del tipo de agente; rojo si falló.
+const rowColor = (a: AgentRun): string =>
+  a.status === 'failed' ? '#D0453F' : tierOf(a.type) === 'other' ? typeColor(a.type) : colorOf(tierOf(a.type))
+
 const agentSvg = (W: number, a: AgentRun, at: number, order = 0): string => {
   const s = tr()
   const tier = tierOf(a.type)
-  const color = colorOf(tier)
+  const color = rowColor(a)
   const ctx = ctxOf(a)
   const textW = W - TX - 22
   const meta = [runModel(a)]
@@ -1036,7 +1041,7 @@ export const register: Register = (on, options) => {
     const barW = Math.max(6, Math.min(20, cols - 34))
     const row = (a: AgentRun) => {
       const tier = tierOf(a.type)
-      const color = colorOf(tier)
+      const color = rowColor(a)
       const ctx = ctxOf(a)
       const progress = progressOf(a)
       const model = runModel(a)

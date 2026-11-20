@@ -45,11 +45,28 @@ Las animaciones duran 1 s por ciclo, se atan al reloj para seguir fluidas aunque
 
 ## Cambiar de tema
 
-El tema es la opción `estilo` del plugin y acepta `cerveza` (por defecto), `boxeador` o `cangrejo`. Hay tres formas de cambiarlo:
+El tema es la opción `estilo` del plugin y acepta `cerveza` (por defecto), `boxeador` o `cangrejo`. Hay cuatro formas de cambiarlo:
 
-1. **Al instalar desde la terminal:** después de elegir el alcance, Claude Code muestra las opciones del plugin. Ahí está **Estilo de las figuras**.
-2. **En una sesión de terminal:** `/config` → **Estilo de las figuras**. El panel se recarga con el tema nuevo.
-3. **En cualquier lugar, incluida la app de escritorio** (que no tiene `/config`): edita `~/.claude/settings.json` (en Windows, `C:\Users\<tu-usuario>\.claude\settings.json`) y agrega dentro del objeto principal:
+1. **Con un comando, desde cualquier terminal** (también la terminal integrada de la app de escritorio). Es la más cómoda:
+
+   En PowerShell o `cmd` (Windows):
+
+   ```
+   cmd /c 'echo {"estilo":"boxeador"}| claude plugin configure savvy-progress-customized@savvy-progress-customized --values-stdin'
+   ```
+
+   En bash o zsh (macOS, Linux, Git Bash):
+
+   ```
+   echo '{"estilo":"boxeador"}' | claude plugin configure savvy-progress-customized@savvy-progress-customized --values-stdin
+   ```
+
+   Responde `Configuration saved. Restart Claude Code to apply it.`: abre una sesión nueva o reinicia la app. Para ver el valor actual: `claude plugin configure savvy-progress-customized@savvy-progress-customized`.
+
+   En Windows PowerShell no conviene usar `'{...}' | claude ...` directamente: suele mandar una marca BOM delante del texto y la CLI lo rechaza. Pasar por `cmd /c`, como arriba, lo evita.
+2. **Al instalar desde la terminal:** después de elegir el alcance, Claude Code muestra las opciones del plugin. Ahí está **Estilo de las figuras**.
+3. **Dentro de una sesión de Claude Code en la terminal** (escribe `claude` en la terminal, no en el chat de la app): `/config` → **Estilo de las figuras**, o `/plugin configure savvy-progress-customized@savvy-progress-customized`.
+4. **Editando el archivo de configuración** a mano: `~/.claude/settings.json` (en Windows, `C:\Users\<tu-usuario>\.claude\settings.json`) y agrega dentro del objeto principal:
 
    ```json
    "pluginConfigs": {

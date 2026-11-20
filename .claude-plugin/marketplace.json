@@ -1,0 +1,14 @@
+{
+  "name": "savvy-progress-customized",
+  "description": "Panel de subagentes para Claude Code con figuras animadas en pixel art; copia endurecida y verificable de savvy-progress.",
+  "owner": {
+    "name": "AcSsalazar"
+  },
+  "plugins": [
+    {
+      "name": "savvy-progress-customized",
+      "source": "./plugin",
+      "description": "Panel de subagentes para Claude Code con figuras animadas en pixel art (cerveza o boxeador). Copia endurecida de savvy-progress: solo observa."
+    }
+  ]
+}

@@ -24,7 +24,7 @@ Lo que se pierde: el detalle de fases y tareas planificadas que la skill `savvy-
 
 Pixel art propio, generado por código en `hooks/estilos.ts` (sin imágenes ni recursos externos). Un solo tema para todo el panel, elegido con la opción `estilo` (cómo cambiarlo, más abajo):
 
-- **`cerveza`** (por defecto): el recipiente indica el tipo de agente (Explore vaso, Plan pinta, general jarra, otro jarra tradicional) y la cerveza, el modelo (trigo, rubia, roja, negra, dorada para Fable). Cada petición al modelo la llena un 5 %. Al terminar se desborda; si falla queda vacía, gris y rajada.
+- **`cerveza`** (por defecto): el recipiente indica el tipo de agente (Explore vaso, Plan pinta, general jarra, otro jarra tradicional) y la cerveza, el modelo (trigo, rubia, roja, negra, dorada para Fable). La cerveza se llena rápido al principio y va frenando (unas 3 peticiones al modelo, media jarra); al terminar queda llena y desbordando, aunque la tarea haya sido corta; si falla queda vacía, gris y rajada.
 - **`boxeador`:** el ejercicio rota por orden (cuerda, pera, saco, flexiones, abdominales, correr, pesas). La pantaloneta indica el modelo y la banda, el tipo. ×N cuenta las peticiones al modelo. Suda con contexto > 70 %.
 - **`cangrejo`:** el dibujo original del autor.
 
@@ -53,13 +53,14 @@ La barra del original (relleno de píxeles, porcentaje y botón ×N) sin depende
 
 Cambios sobre el original para esto (en `register.tsx` y `types/index.d.ts`, solo de dibujo y estado propio): el hook de la barra usa el lote cuando no hay flujo reportado, `rowSvg` acepta la figura del tema en lugar del cangrejo y ✕ guarda `bandFrom` en el estado del panel.
 
-## Opciones (versión `1.2.1-seguro.4`)
+## Opciones (versión `1.2.1-seguro.5`)
 
 | Opción | Valores | Qué hace |
 | --- | --- | --- |
 | `estilo` | `cerveza` (defecto), `boxeador`, `cangrejo` | Tema de las figuras. |
 | `barra` | `si` (defecto), `no` | Muestra u oculta siempre la barra sobre el prompt. |
 | `autoOpen` | `any` (defecto), `savvy`, `never` | `any`: el panel se abre solo con cada lote nuevo de subagentes (si lo cerraste, vuelve con el siguiente); `never`: solo se abre con ×N o `/agents-info`. |
+| `historial` | `sesion` (defecto), `lote` | `sesion`: acumula los subagentes de la sesión, como el original; `lote`: solo el lote actual, limpio con cada lote nuevo. |
 | `language` | `auto`, `en`, `ru`, `he` | Idioma del panel. |
 
 Se cambian como el tema, por ejemplo `cmd /c 'echo {"barra":"no"}| claude plugin configure savvy-progress-customized@savvy-progress-customized --values-stdin'` (las opciones que no pongas conservan su valor).

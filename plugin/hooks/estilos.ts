@@ -421,7 +421,12 @@ export const BANDS: Record<TypeKey, readonly [string, string]> = {
 }
 export const CONTAINER_OF: Record<TypeKey, string> = { explore: 'vaso', plan: 'pinta', general: 'jarra', otro: 'tradicional' }
 
-export type SpriteInput = { type: string; model: string; status: string; steps: number; ctx: number; order: number }
+// level (0..1) fija el nivel de la cerveza; sin él sale de las peticiones al modelo.
+export type SpriteInput = { type: string; model: string; status: string; steps: number; ctx: number; order: number; level?: number }
+
+// Nivel de la cerveza: rápido al principio y frenando (3 peticiones ≈ media jarra, 10 ≈ 9/10);
+// al terminar, llena y desbordando, aunque la tarea haya sido corta.
+export const beerLevel = (steps: number, done: boolean): number => (done ? 1 : 1 - Math.exp(-Math.max(0, steps) / 4.5))
 // Caja donde va la figura: se centra a lo ancho y se apoya en el borde inferior.
 export type Place = { x: number; y: number; w: number; h: number; scale: number; rtl: boolean; animate: boolean }
 
@@ -456,7 +461,7 @@ export function sprite(inp: SpriteInput, estilo: Estilo, at: number, place: Plac
   if (kind === 'cerveza') {
     w = CW; h = CH
     const state = inp.status === 'failed' ? 'fail' : inp.status === 'done' ? 'done' : 'run'
-    const level = Math.min(1, inp.steps / 20)
+    const level = state === 'done' ? 1 : inp.level ?? beerLevel(inp.steps, false)
     const list = state === 'fail' ? [beerFrame(CONTAINER_OF[t], BEERS[m], 0, 0, 'fail')]
       : [0, 1, 2].map(tick => beerFrame(CONTAINER_OF[t], BEERS[m], level, tick, state))
     body = frames(list, w, h, at, place.animate && state !== 'fail', 'sf3')

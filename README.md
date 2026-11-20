@@ -42,6 +42,7 @@ En la app de escritorio, donde `/plugin` no está disponible: botón **+** junto
 | `estilo` | `cerveza` (defecto), `boxeador`, `cangrejo` | Tema de las figuras (ver [Cambiar de tema](#cambiar-de-tema)). |
 | `barra` | `si` (defecto), `no` | Muestra u oculta siempre la barra sobre el prompt. El panel sigue disponible con `/agents-info`. |
 | `autoOpen` | `any` (defecto), `savvy`, `never` | `any`: el panel se abre solo con cada lote nuevo de subagentes; `savvy`: solo con trabajadores `savvy-*`; `never`: solo se abre con ×N o `/agents-info`. |
+| `historial` | `sesion` (defecto), `lote` | `sesion`: el panel acumula todos los subagentes de la sesión, con Terminados plegable (como el original); `lote`: muestra solo el lote actual y empieza limpio con cada lote nuevo. |
 | `language` | `auto` (defecto), `en`, `ru`, `he` | Idioma del panel. |
 
 Todas se cambian igual que el tema, con `claude plugin configure`; las que no pongas conservan su valor. Por ejemplo, para apagar la barra:
@@ -53,7 +54,7 @@ cmd /c 'echo {"barra":"no"}| claude plugin configure savvy-progress-customized@s
 
 | Tema | Qué indica cada cosa |
 | --- | --- |
-| Cerveza | Recipiente = tipo de agente (Explore vaso, Plan pinta, general jarra, otro jarra tradicional). Cerveza = modelo (Haiku rubia, Sonnet roja, Opus negra, Fable dorada, otro trigo). Nivel = peticiones al modelo, 5 % cada una. Al terminar se desborda; si falla queda vacía, gris y rajada. |
+| Cerveza | Recipiente = tipo de agente (Explore vaso, Plan pinta, general jarra, otro jarra tradicional). Cerveza = modelo (Haiku rubia, Sonnet roja, Opus negra, Fable dorada, otro trigo). Nivel: se llena rápido al principio y va frenando (unas 3 peticiones al modelo, media jarra); al terminar queda llena y desbordando, aunque la tarea haya sido corta; si falla queda vacía, gris y rajada. |
 | Boxeador | Ejercicio = orden de llegada (cuerda, pera, saco, flexiones, abdominales, correr, pesas). Pantaloneta = modelo (Haiku verde, Sonnet azul, Opus morada, Fable dorada, otro gris). Banda = tipo de agente. ×N = peticiones al modelo. Suda con el contexto por encima del 70 %. |
 
 Las animaciones duran 1 s por ciclo, se atan al reloj para seguir fluidas aunque el panel se redibuje cada segundo, y se detienen con `prefers-reduced-motion`.

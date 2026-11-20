@@ -238,7 +238,7 @@ const batchFlow = (list: AgentRun[], from: number): Flow | null => {
 const bandFigure = (list: AgentRun[], f: Flow, W: number, at: number): string | null => {
   const a = list.find(r => r.status === 'running') ?? list[list.length - 1]
   const fig = sprite(
-    { type: a?.type ?? 'general-purpose', model: a?.model ?? '', status: f.isFinished ? 'done' : 'running', steps: Math.round(ratio(f) * 20), ctx: 0, order: 0 },
+    { type: a?.type ?? 'general-purpose', model: a?.model ?? '', status: f.isFinished ? 'done' : 'running', steps: 0, level: ratio(f), ctx: 0, order: 0 },
     estilo, at, { x: isRtl() ? 0 : W - CRAB_W - 4, y: 0, w: CRAB_W + 4, h: H, scale: 0.72, rtl: isRtl(), animate: !f.isFinished },
   )
   return fig && SPRITE_CSS + fig
@@ -947,7 +947,9 @@ export const register: Register = (on, options) => {
     const s = tr()
     const ui = $.ui.resolve(e)
     const { Box, Text, Button } = ui
-    const list = await read($, agents)
+    // historial lote: el panel muestra solo el lote actual, como un flujo nuevo del original.
+    const all = await read($, agents)
+    const list = options.historial === 'lote' ? batchOf(all, 0) : all
     const f = await read($, flow)
     const p: Panel = await read($, panel)
     const at = Math.max(await read($, now), ...list.map(a => a.startedAt), 0)

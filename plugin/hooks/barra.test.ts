@@ -130,3 +130,25 @@ test('panel: con autoOpen never no se abre solo', { options: { autoOpen: 'never'
   await spawn($, 'Uno')
   expect(opened).toEqual([])
 })
+
+const pane = { title: '', isFocused: false, bodyColumns: 60, placement: 'dock', scroll: { offset: 0, bodyRows: 30 }, view: {} } as const
+const paneRows = async ($: Engine) => {
+  const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', component: 'Pane', requestId: 'savvy-agents', props: pane })
+  const texts = (await ui.findAll({ type: 'Text' })).map(t => t.text).join('\n')
+  await ui.unmount()
+  return texts
+}
+
+for (const [historial, keepsOld] of [['sesion', true], ['lote', false]] as const)
+  test(`historial ${historial}: ${keepsOld ? 'conserva' : 'limpia'} los terminados de lotes anteriores`, { options: { historial } }, async ($, on) => {
+    const clock = engine(on, [], [])
+    await $.session.start({ source: 'startup', cwd: '/repo', surface: 'desktop', isInteractive: true } as never)
+    await spawn($, 'Lote viejo')
+    await finish($, 'a1')
+    await clock.advance(5000)
+    await spawn($, 'Lote nuevo')
+    const texts = await paneRows($)
+    expect(texts).toContain('Lote nuevo')
+    if (keepsOld) expect(texts).toContain('Lote viejo')
+    else expect(texts).not.toContain('Lote viejo')
+  })

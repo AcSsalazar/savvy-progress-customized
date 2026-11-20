@@ -155,7 +155,7 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
          "const bandFigure = (list: AgentRun[], f: Flow, W: number, at: number): string | null => {\n"
          "  const a = list.find(r => r.status === 'running') ?? list[list.length - 1]\n"
          "  const fig = sprite(\n"
-         "    { type: a?.type ?? 'general-purpose', model: a?.model ?? '', status: f.isFinished ? 'done' : 'running', steps: Math.round(ratio(f) * 20), ctx: 0, order: 0 },\n"
+         "    { type: a?.type ?? 'general-purpose', model: a?.model ?? '', status: f.isFinished ? 'done' : 'running', steps: 0, level: ratio(f), ctx: 0, order: 0 },\n"
          "    estilo, at, { x: isRtl() ? 0 : W - CRAB_W - 4, y: 0, w: CRAB_W + 4, h: H, scale: 0.72, rtl: isRtl(), animate: !f.isFinished },\n"
          "  )\n"
          "  return fig && SPRITE_CSS + fig\n"
@@ -190,6 +190,13 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
     edit(R, "      await autoOpen($, 'any-agent')\n",
          "      // Una vez por lote: si se cerró, vuelve cuando arranca el lote siguiente.\n"
          "      await autoOpen($, `lote-${batchOf(await read($, agents), 0)[0]?.startedAt ?? 0}`)\n")
+    # 13. Opción historial: sesion (como el original) o lote (el panel muestra solo el lote actual).
+    edit(R, "    const { Box, Text, Button } = ui\n    const list = await read($, agents)\n    const f = await read($, flow)\n",
+         "    const { Box, Text, Button } = ui\n"
+         "    // historial lote: el panel muestra solo el lote actual, como un flujo nuevo del original.\n"
+         "    const all = await read($, agents)\n"
+         "    const list = options.historial === 'lote' ? batchOf(all, 0) : all\n"
+         "    const f = await read($, flow)\n")
     edit(R, "source={rowSvg(f, width, isWorking)}", "source={rowSvg(f, width, isWorking, bandFigure(list, f, width, at))}")
 
 

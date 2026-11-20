@@ -106,7 +106,7 @@ Un valor distinto de `boxeador`, `cerveza`, `minero` o `cangrejo` se ignora y el
 
 - **Origen fijo:** `original/` es savvy-progress 1.2.1 tal cual, del commit `af8902c493f0a8db6be5e44bb74b567571f7824f`. No se instala desde el marketplace del autor, así que no cambia solo.
 - **Endurecido:** se quitaron las herramientas `progress` y `step` y el párrafo que el original añadía al prompt de los subagentes `savvy-*`. Todos los hooks pasan el evento intacto (`next(e)`).
-- **Capacidades:** reloj, su comando, su panel, su propio estado, leer la configuración (solo usa `language`) y `LANG`/`LC_ALL`/`LC_MESSAGES`. Sin red, archivos, procesos, modelos, telemetría ni herramientas. Los dibujos son SVG generados por código: sin scripts ni recursos externos.
+- **Capacidades:** reloj, su comando, su panel, su propio estado, leer la configuración (solo usa `language`), `LANG`/`LC_ALL`/`LC_MESSAGES` y, mientras algún subagente corre, la lista de agentes de la sesión (`$.agent.list`, solo lectura) para saber con certeza cuándo terminó cada uno. Sin red, archivos, procesos, modelos, telemetría ni herramientas. Los dibujos son SVG generados por código: sin scripts ni recursos externos.
 - **Receta verificable:** `herramientas/endurecer.py verificar` rehace los archivos del plugin a partir de `original/` con reemplazos exactos y comprueba que coinciden byte a byte.
 - **Guardia:** `plugin/verificar.ps1` falla si un archivo no coincide con `plugin/huellas.sha256`, si aparece código de red, `eval` o `import()`, o si el validador de Claude Code reporta eventos, llamadas, hosts o telemetría fuera de la lista permitida.
 

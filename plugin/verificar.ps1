@@ -39,7 +39,7 @@ foreach ($rel in @($esperadas.Keys)) { $fallas.Add("falta el archivo: $rel") }
 $prohibido = @(
   '\bfetch\s*\(', '\beval\s*\(', 'new\s+Function\b', '\bimport\s*\(', '\brequire\s*\(',
   'globalThis', '\bWebSocket\b', 'XMLHttpRequest', 'sendBeacon', 'EventSource',
-  '\$\.(http|fs|process|model|net|store|session|agent|tool|skill|permissions|settings\.write)\b',
+  '\$\.(http|fs|process|model|net|store|session|agent(?!\.list\()|tool|skill|permissions|settings\.write)\b',
   # Cada hook pasa el evento intacto: un next() con otro argumento reescribiria
   # lo que sigue (un prompt, una llamada, un resultado).
   '\bnext\((?!e\))'
@@ -53,7 +53,8 @@ foreach ($f in $codigo) {
 
 # 3. Lo que el validador de Claude Code ve en el modulo.
 $eventos = @('session.start', 'command.run', 'tool.call', 'agent.spawn', 'turn.step', 'turn.complete', 'ui.render')
-$llamadas = @('clock.every', 'clock.now', 'command.register', 'env.get', 'settings.read', 'state.get', 'state.set',
+# agent.list: solo lectura, para saber con certeza cuándo terminó cada subagente.
+$llamadas = @('agent.list', 'clock.every', 'clock.now', 'command.register', 'env.get', 'settings.read', 'state.get', 'state.set',
   'ui.close', 'ui.open', 'ui.panes', 'ui.resolve')
 $json = (& claude plugin validate --json $raiz 2>$null) -join "`n"
 if ($LASTEXITCODE -ne 0) { $fallas.Add('claude plugin validate fallo') }

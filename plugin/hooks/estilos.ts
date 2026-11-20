@@ -479,6 +479,8 @@ export const SHORTS: Record<ModelKey, readonly [string, string, string]> = {
 export const BANDS: Record<TypeKey, readonly [string, string]> = {
   explore: ['#2aa598', '#1c7b71'], plan: ['#e09a2e', '#b0761d'], general: ['#8b62d8', '#6a47ad'], otro: ['#c23a30', '#922a22'],
 }
+// Color del tipo de agente (el de la banda del boxeador), para la barra de cada fila.
+export const typeColor = (type: string): string => BANDS[typeKey(type)][0]
 export const CONTAINER_OF: Record<TypeKey, string> = { explore: 'vaso', plan: 'pinta', general: 'jarra', otro: 'tradicional' }
 const STONE = ['#8f8f8f', '#7d7d7d', '#a3a3a3', '#727272'] as const
 // Minero: material del bloque según el modelo, camisa según el tipo de agente.

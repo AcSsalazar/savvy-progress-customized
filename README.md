@@ -37,6 +37,7 @@ En la app de escritorio, donde `/plugin` no está disponible: botón **+** junto
 ## Uso
 
 - **Barra sobre el prompt:** muestra el lote de subagentes en curso (`Agents · Tasks 2/3 · 67%`) con el relleno de píxeles del original. **×N** abre o cierra el panel con un clic; **✕** la oculta hasta que arranque otro subagente.
+- **Barra de cada subagente:** avance estimado por las peticiones al modelo (rápido al inicio y frenando), con el color del tipo de agente; llena al terminar y en rojo si falla. El texto de al lado muestra el % de contexto real.
 - `/agents-info` abre o cierra el panel; `/agents-info open` lo trae al frente. Se abre solo con cada lote nuevo de subagentes: si lo cierras, vuelve con el lote siguiente.
 
 ### Opciones

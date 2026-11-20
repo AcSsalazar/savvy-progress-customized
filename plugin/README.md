@@ -54,6 +54,10 @@ La barra del original (relleno de píxeles, porcentaje y botón ×N) sin depende
 
 Cambios sobre el original para esto (en `register.tsx` y `types/index.d.ts`, solo de dibujo y estado propio): el hook de la barra usa el lote cuando no hay flujo reportado, `rowSvg` acepta la figura del tema en lugar del cangrejo y ✕ guarda `bandFrom` en el estado del panel.
 
+## Barra de cada subagente (versión `1.2.1-seguro.7`)
+
+Sin la herramienta `step`, el original pintaba en gris el % de contexto. Aquí la barra muestra el avance estimado por las peticiones al modelo, con el color del tipo de agente (Explore verde azulado, Plan ámbar, general violeta, otros rojo); llena al terminar, roja si falla. Cambio en `register.tsx`: `progressOf` y `rowColor`.
+
 ## Opciones (versión `1.2.1-seguro.5`)
 
 | Opción | Valores | Qué hace |

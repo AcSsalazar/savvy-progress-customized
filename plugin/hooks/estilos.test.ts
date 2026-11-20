@@ -85,3 +85,12 @@ test('estilo minero: todas las filas son minero, animadas y dentro del límite d
     expect(s.length).toBeLessThan(MAX_SVG)
   }
 })
+
+test('barra de fila: color del tipo de agente, no el gris del contexto', async ($, on) => {
+  engine(on)
+  await start($)
+  await spawn($, 'Explore', 'Con color', 'claude-haiku-5-5')
+  const row = (await rows($)).find(s => s.includes('Con color'))
+  expect(row).toContain('fill="#2aa598"')
+  expect(row).not.toContain('<rect class="m"')
+})

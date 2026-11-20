@@ -74,7 +74,7 @@ test('panel: se abre solo con cualquier subagente; en el escritorio dibuja la fi
   const rows = (await desk.findAll({ type: 'Svg' })).map(el => String(el.props.source))
   const card = rows.find(s => s.includes('Tarea Explore'))
   expect(card).toBeDefined()
-  expect(card).toContain('data-estilo="cerveza"')
+  expect(card).toContain('data-estilo="boxeador"')
   expect(card).toContain('prefers-reduced-motion')
   await desk.unmount()
 

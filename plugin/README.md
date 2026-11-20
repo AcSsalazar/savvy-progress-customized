@@ -24,8 +24,9 @@ Lo que se pierde: el detalle de fases y tareas planificadas que la skill `savvy-
 
 Pixel art propio, generado por código en `hooks/estilos.ts` (sin imágenes ni recursos externos). Un solo tema para todo el panel, elegido con la opción `estilo` (cómo cambiarlo, más abajo):
 
-- **`cerveza`** (por defecto): el recipiente indica el tipo de agente (Explore vaso, Plan pinta, general jarra, otro jarra tradicional) y la cerveza, el modelo (trigo, rubia, roja, negra, dorada para Fable). La cerveza se llena rápido al principio y va frenando (unas 3 peticiones al modelo, media jarra); al terminar queda llena y desbordando, aunque la tarea haya sido corta; si falla queda vacía, gris y rajada.
-- **`boxeador`:** el ejercicio rota por orden (cuerda, pera, saco, flexiones, abdominales, correr, pesas). La pantaloneta indica el modelo y la banda, el tipo. ×N cuenta las peticiones al modelo. Suda con contexto > 70 %.
+- **`cerveza`:** el recipiente indica el tipo de agente (Explore vaso, Plan pinta, general jarra, otro jarra tradicional) y la cerveza, el modelo (trigo, rubia, roja, negra, dorada para Fable). La cerveza se llena rápido al principio y va frenando (unas 3 peticiones al modelo, media jarra); al terminar queda llena y desbordando, aunque la tarea haya sido corta; si falla queda vacía, gris y rajada.
+- **`boxeador`** (por defecto): el ejercicio rota por orden (cuerda, pera, saco, flexiones, abdominales, correr, pesas). La pantaloneta indica el modelo y la banda, el tipo. ×N cuenta las peticiones al modelo. Suda con contexto > 70 %.
+- **`minero`:** pica un bloque en bucle; el bloque indica el modelo (piedra, hierro, oro, diamante para Fable, tierra para otros) y la camisa, el tipo.
 - **`cangrejo`:** el dibujo original del autor.
 
 Las animaciones duran 1 s por ciclo y se atan al reloj, así siguen fluidas aunque la fila se redibuje cada segundo. Respetan `prefers-reduced-motion`.
@@ -38,7 +39,7 @@ Las animaciones duran 1 s por ciclo y se atan al reloj, así siguen fluidas aunq
 }
 ```
 
-Si el panel no cambia, abre una sesión nueva. Un valor fuera de `cerveza`, `boxeador` o `cangrejo` vuelve a `cerveza`.
+Si el panel no cambia, abre una sesión nueva. Un valor fuera de `boxeador`, `cerveza`, `minero` o `cangrejo` vuelve a `boxeador`.
 
 Cambios sobre el original para esto (todos en `register.tsx`, solo de dibujo): importar `hooks/estilos.ts`, leer la opción `estilo`, dibujar la figura en lugar del cangrejo en las filas y en la vista compacta, y correr el texto de la fila a `TX = 64` para dar sitio a la figura.
 
@@ -57,7 +58,7 @@ Cambios sobre el original para esto (en `register.tsx` y `types/index.d.ts`, sol
 
 | Opción | Valores | Qué hace |
 | --- | --- | --- |
-| `estilo` | `cerveza` (defecto), `boxeador`, `cangrejo` | Tema de las figuras. |
+| `estilo` | `boxeador` (defecto), `cerveza`, `minero`, `cangrejo` | Tema de las figuras. |
 | `barra` | `si` (defecto), `no` | Muestra u oculta siempre la barra sobre el prompt. |
 | `autoOpen` | `any` (defecto), `savvy`, `never` | `any`: el panel se abre solo con cada lote nuevo de subagentes (si lo cerraste, vuelve con el siguiente); `never`: solo se abre con ×N o `/agents-info`. |
 | `historial` | `sesion` (defecto), `lote` | `sesion`: acumula los subagentes de la sesión, como el original; `lote`: solo el lote actual, limpio con cada lote nuevo. |

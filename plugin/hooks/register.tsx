@@ -125,7 +125,7 @@ const STRINGS = {
 // Module scope is fine here: session.start sets it again on every (re)load.
 let lang: Lang = 'en'
 // El estilo de las figuras: la opción `estilo`, fijada en session.start como `lang`.
-let estilo: Estilo = 'cerveza'
+let estilo: Estilo = 'boxeador'
 const tr = () => STRINGS[lang]
 
 // Hebrew draws every row mirrored: crab and title on the right, numbers on the left.

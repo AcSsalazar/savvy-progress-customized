@@ -1,11 +1,11 @@
-// Estilos propios de savvy-progress-customized: cerveza y boxeador en pixel art.
+// Estilos propios de savvy-progress-customized: boxeador, cerveza y minero en pixel art.
 // Todo se genera aquí como texto SVG: sin recursos externos, sin red, sin llamadas al motor.
 // Cada parte tiene profundidad (z); el render sombrea por bordes y contornea la silueta.
 
-// Un solo tema para todo el panel: cerveza (por defecto), boxeador o el cangrejo original.
-export type Estilo = 'cerveza' | 'boxeador' | 'cangrejo'
-export const ESTILOS: readonly Estilo[] = ['cerveza', 'boxeador', 'cangrejo']
-export const estiloOf = (v: unknown): Estilo => (ESTILOS as readonly unknown[]).includes(v) ? (v as Estilo) : 'cerveza'
+// Un solo tema para todo el panel: boxeador (por defecto), cerveza, minero o el cangrejo original.
+export type Estilo = 'boxeador' | 'cerveza' | 'minero' | 'cangrejo'
+export const ESTILOS: readonly Estilo[] = ['boxeador', 'cerveza', 'minero', 'cangrejo']
+export const estiloOf = (v: unknown): Estilo => (ESTILOS as readonly unknown[]).includes(v) ? (v as Estilo) : 'boxeador'
 
 type Pt = [number, number]
 type Part = { id: string; z: number; base: string; shade?: string; light?: string; line?: string; flat?: boolean; noOutline?: boolean; sep?: boolean }
@@ -397,6 +397,66 @@ export function beerFrame(kind: string, pal: BeerPal, level: number, tick: numbe
   return render(c)
 }
 
+// ---------------------------------------------------------------- minero
+
+// Minero de frente, de bloques (cabeza 8×8, torso y brazos de 4 px), que pica un bloque
+// de 16×16. Diseño propio: pelo negro, camisa de cuadros según el tipo, pantalón café.
+const MINER_BODY = [
+  '....HHHHHHHH....', '....HHHHHHHH....', '....HSSSSSSH....', '....SSSSSSSS....', '....SWESSEWS....', '....SSSssSSS....', '....SSSmmSSS....', '....SSSSSSSS....',
+  'TTTTTTTTTTTT....', 'TtTTTtTTtTTT....', 'TTTTTTTTTTTT....', 'tTTtTTtTTtTT....', 'TTTTTTTTTTTT....', 'TTTTTtTTtTTT....', 'SSSSTTTTTTTT....', 'SSSStTTtTTtT....',
+  'SSSSTTTTTTTT....', 'SSSSKKKGGKKK....', 'SSSSTTTTTTTT....', 'sSSsTTTTTTTT....', ...Array<string>(9).fill('....NNNNnnnn....'), ...Array<string>(3).fill('....BBBBBBBB....'),
+]
+const ORE_SPOTS: readonly Pt[] = [[2, 2], [10, 3], [4, 9], [11, 10], [7, 6], [1, 13]]
+const CRACKS: readonly (readonly Pt[])[] = [
+  [[7, 7], [8, 7], [8, 8]], [[6, 6], [9, 8], [9, 9], [7, 9], [6, 5]], [[5, 5], [10, 9], [10, 10], [6, 10], [4, 6], [11, 7]],
+]
+// Ángulo del brazo por cuadro (0° abajo, 90° hacia el bloque, 180° arriba) y grietas visibles.
+const SWING = [150, 168, 112, 42, 48, 98] as const
+const CRACK_STAGE = [0, 0, 0, 2, 3, 1] as const
+
+type Material = { base: readonly string[]; ore?: readonly [string, string, string] }
+
+// Lienzo más alto que el del boxeador: el pico levantado no se sale por arriba.
+export const MH = 40
+
+export function minerFrame(k: number, mat: Material, shirt: readonly [string, string]): (string | null)[] {
+  const c = canvas(BW, MH)
+  for (let x = 0; x < BW; x++) put(c, x, MH - 1, flat('ground', 0.1, 'rgba(0,0,0,.16)'))
+  const ox = 2, oy = MH - 33
+  const C: Record<string, string> = { H: '#2a1c14', S: '#d9a07a', s: '#c08660', W: '#f4f4f4', E: '#3a2a1e', m: '#8a4a3a', T: shirt[0], t: shirt[1], K: '#3a2a1a', G: '#d4ac2a', N: '#6b4a2e', n: '#5a3d25', B: '#2b2119' }
+  MINER_BODY.forEach((row, y) => [...row].forEach((ch, x) => {
+    const col = C[ch]
+    if (col) put(c, ox + x, oy + y, { id: 'body', z: 5, base: col, flat: true })
+  }))
+
+  // Bloque con textura del material, grietas según el cuadro y temblor en el golpe.
+  const bx = 21 + (k === 3 ? 1 : 0), by = MH - 17
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+    const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453
+    const col = mat.base[Math.floor((n - Math.floor(n)) * mat.base.length)] ?? mat.base[0] ?? '#888'
+    put(c, bx + x, by + y, { id: 'block', z: 3, base: y === 0 ? mix(col, 0.12) : y === 15 ? mix(col, 0.18, 0) : col, flat: true })
+  }
+  if (mat.ore) for (const [sx, sy] of ORE_SPOTS) for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1], [2, 1]] as const)
+    put(c, bx + sx + dx, by + sy + dy, { id: 'ore', z: 3.1, base: dx === 0 && dy === 0 ? mat.ore[2] : dy ? mat.ore[1] : mat.ore[0], flat: true })
+  for (let s = 0; s < (CRACK_STAGE[k] ?? 0); s++) for (const [x, y] of CRACKS[s] ?? []) put(c, bx + x, by + y, flat('crack', 3.5, 'rgba(20,20,20,.75)'))
+  if (k >= 3) for (const [i, [dx, dy]] of ([[-2, -3], [0, -5], [-3, -1], [1, -4]] as Pt[]).entries()) {
+    const t = k - 3 + 1
+    put(c, bx - 1 + Math.round(dx * t * 0.7), by + 4 + Math.round(dy * t * 0.7), flat('chip', 9, (mat.ore ?? mat.base)[i % (mat.ore ?? mat.base).length] ?? '#888'))
+  }
+
+  // Brazo derecho con el pico: manga, antebrazo, mango y cabeza de hierro, girados desde el hombro.
+  const sh: Pt = [ox + 13.5, oy + 8.5], a = ((SWING[k] ?? 150) * Math.PI) / 180
+  const d: Pt = [Math.sin(a), Math.cos(a)], p: Pt = [-d[1], d[0]]
+  const at = (dist: number, side = 0): Pt => add(add(sh, d, dist), p, side)
+  line(c, at(0.5), at(5.5), 4, solid('sleeve', 6, shirt[0], shirt[1], mix(shirt[0], 0.25)))
+  line(c, at(5.5), at(10.5), 4, solid('forearm', 6.1, '#d9a07a', '#b88158', '#ecbf98'))
+  line(c, at(10), at(17), 1.6, solid('handle', 6.5, '#8b5a2b', '#6b4320', '#a8733f'))
+  line(c, at(16.6, -5.5), at(16.6, 5.5), 2.2, solid('pick', 7, '#c9ccd2', '#8e929a', '#eceff3'))
+  line(c, at(16.6, -5.5), at(15, -6.6), 1.4, solid('pick', 7, '#c9ccd2', '#8e929a', '#eceff3'))
+  line(c, at(16.6, 5.5), at(15, 6.6), 1.4, solid('pick', 7, '#c9ccd2', '#8e929a', '#eceff3'))
+  return render(c)
+}
+
 // ---------------------------------------------------------------- qué dibujar para un agente
 
 const MODELS = ['haiku', 'sonnet', 'opus', 'fable'] as const
@@ -420,6 +480,16 @@ export const BANDS: Record<TypeKey, readonly [string, string]> = {
   explore: ['#2aa598', '#1c7b71'], plan: ['#e09a2e', '#b0761d'], general: ['#8b62d8', '#6a47ad'], otro: ['#c23a30', '#922a22'],
 }
 export const CONTAINER_OF: Record<TypeKey, string> = { explore: 'vaso', plan: 'pinta', general: 'jarra', otro: 'tradicional' }
+const STONE = ['#8f8f8f', '#7d7d7d', '#a3a3a3', '#727272'] as const
+// Minero: material del bloque según el modelo, camisa según el tipo de agente.
+export const MATERIALS: Record<ModelKey, Material> = {
+  otro: { base: ['#866043', '#79553a', '#986d4a', '#6a4830'] }, haiku: { base: STONE },
+  sonnet: { base: STONE, ore: ['#d9b394', '#bf9271', '#f1d8c2'] }, opus: { base: STONE, ore: ['#f6d63c', '#d9a91f', '#fff2a1'] },
+  fable: { base: STONE, ore: ['#5fdcea', '#2fb2c4', '#c9fbff'] },
+}
+export const SHIRTS: Record<TypeKey, readonly [string, string]> = {
+  explore: ['#2a9d8f', '#1f7a6f'], plan: ['#d08c2a', '#a86f1d'], general: ['#7a5cc7', '#5f45a3'], otro: ['#a8322a', '#7e241e'],
+}
 
 // level (0..1) fija el nivel de la cerveza; sin él sale de las peticiones al modelo.
 export type SpriteInput = { type: string; model: string; status: string; steps: number; ctx: number; order: number; level?: number }
@@ -465,6 +535,10 @@ export function sprite(inp: SpriteInput, estilo: Estilo, at: number, place: Plac
     const list = state === 'fail' ? [beerFrame(CONTAINER_OF[t], BEERS[m], 0, 0, 'fail')]
       : [0, 1, 2].map(tick => beerFrame(CONTAINER_OF[t], BEERS[m], level, tick, state))
     body = frames(list, w, h, at, place.animate && state !== 'fail', 'sf3')
+  } else if (kind === 'minero') {
+    w = BW; h = MH
+    const list = live ? Array.from({ length: 6 }, (_, k) => minerFrame(k, MATERIALS[m], SHIRTS[t])) : [minerFrame(0, MATERIALS[m], SHIRTS[t])]
+    body = frames(list, w, h, at, place.animate && live, 'sf6')
   } else {
     w = BW; h = BH
     // El ejercicio rota por orden de llegada: cuerda, pera, saco, flexiones, abdominales, correr, pesas.
@@ -476,5 +550,5 @@ export function sprite(inp: SpriteInput, estilo: Estilo, at: number, place: Plac
   }
   const ox = x + Math.round((place.w - w * scale) / 2), oy = y + Math.round(place.h - h * scale)
   const tx = rtl ? ox + w * scale : ox
-  return `<g data-estilo="${kind}" transform="translate(${tx} ${oy}) scale(${rtl ? -scale : scale} ${scale})" opacity="${inp.status === 'failed' && kind === 'boxeador' ? 0.45 : 1}" shape-rendering="crispEdges">${body}</g>`
+  return `<g data-estilo="${kind}" transform="translate(${tx} ${oy}) scale(${rtl ? -scale : scale} ${scale})" opacity="${inp.status === 'failed' && kind !== 'cerveza' ? 0.45 : 1}" shape-rendering="crispEdges">${body}</g>`
 }

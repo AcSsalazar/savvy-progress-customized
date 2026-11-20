@@ -4,7 +4,13 @@ Panel de subagentes para [Claude Code](https://claude.com/claude-code) con figur
 
 Es una copia endurecida de [savvy-progress](https://github.com/johnnyvizz/claude-kit/tree/main/plugins/savvy-progress) de johnnyvizz (MIT): solo observa, no da herramientas al modelo ni reescribe prompts.
 
+**Trae dos temas, y se elige uno para todo el panel:** `cerveza` (por defecto) y `boxeador`, además de `cangrejo`, el dibujo original del autor. Ver [Cambiar de tema](#cambiar-de-tema).
+
+**Tema `cerveza`** (por defecto)
+
 ![Tema cerveza](docs/cerveza.gif)
+
+**Tema `boxeador`**
 
 ![Tema boxeador](docs/boxeador.gif)
 
@@ -27,7 +33,7 @@ En la app de escritorio, donde `/plugin` no está disponible: botón **+** junto
 ## Uso
 
 - `/agents-info` abre o cierra el panel; `/agents-info open` lo trae al frente. Se abre solo cuando empieza un subagente.
-- En `/config`, **Estilo de las figuras** elige el tema de todo el panel: `cerveza` (por defecto), `boxeador` o `cangrejo` (el dibujo original del autor).
+- El tema es uno para todo el panel: `cerveza` (por defecto), `boxeador` o `cangrejo`. Ver [Cambiar de tema](#cambiar-de-tema).
 
 | Tema | Qué indica cada cosa |
 | --- | --- |
@@ -35,6 +41,26 @@ En la app de escritorio, donde `/plugin` no está disponible: botón **+** junto
 | Boxeador | Ejercicio = orden de llegada (cuerda, pera, saco, flexiones, abdominales, correr, pesas). Pantaloneta = modelo (Haiku verde, Sonnet azul, Opus morada, Fable dorada, otro gris). Banda = tipo de agente. ×N = peticiones al modelo. Suda con el contexto por encima del 70 %. |
 
 Las animaciones duran 1 s por ciclo, se atan al reloj para seguir fluidas aunque el panel se redibuje cada segundo, y se detienen con `prefers-reduced-motion`.
+
+## Cambiar de tema
+
+El tema es la opción `estilo` del plugin y acepta `cerveza` (por defecto), `boxeador` o `cangrejo`. Hay tres formas de cambiarlo:
+
+1. **Al instalar desde la terminal:** después de elegir el alcance, Claude Code muestra las opciones del plugin. Ahí está **Estilo de las figuras**.
+2. **En una sesión de terminal:** `/config` → **Estilo de las figuras**. El panel se recarga con el tema nuevo.
+3. **En cualquier lugar, incluida la app de escritorio** (que no tiene `/config`): edita `~/.claude/settings.json` (en Windows, `C:\Users\<tu-usuario>\.claude\settings.json`) y agrega dentro del objeto principal:
+
+   ```json
+   "pluginConfigs": {
+     "savvy-progress-customized@savvy-progress-customized": {
+       "options": { "estilo": "boxeador" }
+     }
+   }
+   ```
+
+   Si `pluginConfigs` ya existe, agrega solo la entrada del plugin. La clave es el nombre completo `plugin@marketplace`, el mismo que aparece en `enabledPlugins`. Si el panel no cambia, abre una sesión nueva.
+
+Un valor distinto de `cerveza`, `boxeador` o `cangrejo` se ignora y el panel vuelve a `cerveza`.
 
 ## Seguridad
 

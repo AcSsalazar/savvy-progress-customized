@@ -22,13 +22,23 @@ Lo que se pierde: la barra de progreso de la skill `savvy-flow`, que dependía d
 
 ## Estilos de las figuras (versión `1.2.1-seguro.2`)
 
-Pixel art propio, generado por código en `hooks/estilos.ts` (sin imágenes ni recursos externos). Se elige con la opción `estilo` en `/config`, un solo tema para todo el panel:
+Pixel art propio, generado por código en `hooks/estilos.ts` (sin imágenes ni recursos externos). Un solo tema para todo el panel, elegido con la opción `estilo` (cómo cambiarlo, más abajo):
 
 - **`cerveza`** (por defecto): el recipiente indica el tipo de agente (Explore vaso, Plan pinta, general jarra, otro jarra tradicional) y la cerveza, el modelo (trigo, rubia, roja, negra, dorada para Fable). Cada petición al modelo la llena un 5 %. Al terminar se desborda; si falla queda vacía, gris y rajada.
 - **`boxeador`:** el ejercicio rota por orden (cuerda, pera, saco, flexiones, abdominales, correr, pesas). La pantaloneta indica el modelo y la banda, el tipo. ×N cuenta las peticiones al modelo. Suda con contexto > 70 %.
 - **`cangrejo`:** el dibujo original del autor.
 
 Las animaciones duran 1 s por ciclo y se atan al reloj, así siguen fluidas aunque la fila se redibuje cada segundo. Respetan `prefers-reduced-motion`.
+
+**Cambiar de tema:** al instalar desde la terminal (pantalla de opciones), con `/config` → **Estilo de las figuras** en una sesión de terminal, o, en cualquier lugar incluida la app de escritorio, en `~/.claude/settings.json`:
+
+```json
+"pluginConfigs": {
+  "savvy-progress-customized@savvy-progress-customized": { "options": { "estilo": "boxeador" } }
+}
+```
+
+Si el panel no cambia, abre una sesión nueva. Un valor fuera de `cerveza`, `boxeador` o `cangrejo` vuelve a `cerveza`.
 
 Cambios sobre el original para esto (todos en `register.tsx`, solo de dibujo): importar `hooks/estilos.ts`, leer la opción `estilo`, dibujar la figura en lugar del cangrejo en las filas y en la vista compacta, y correr el texto de la fila a `TX = 64` para dar sitio a la figura.
 

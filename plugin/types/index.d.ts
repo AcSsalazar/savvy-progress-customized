@@ -44,6 +44,8 @@ export type Panel = {
   isCompact: boolean
   isDoneCollapsed: boolean
   autoOpenedFor: string
+  /** Desde cuándo cuenta la barra propia: ✕ la oculta hasta el siguiente lote. */
+  bandFrom?: number
 }
 
 declare module 'claude-code' {

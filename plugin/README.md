@@ -18,7 +18,7 @@ El README original del autor está en `README.upstream.md`.
 4. **Nombre propio** (`savvy-progress-customized`), para no chocar con el original si algún día se instala.
 5. Se borraron el código y las pruebas que solo servían a esas herramientas. Las pruebas de costo y contexto del autor se conservan; `hooks/seguridad.test.ts` prueba lo anterior.
 
-Lo que se pierde: la barra de progreso de la skill `savvy-flow`, que dependía de la herramienta `progress`.
+Lo que se pierde: el detalle de fases y tareas planificadas que la skill `savvy-flow` reportaba con la herramienta `progress`. La barra en sí vuelve en `1.2.1-seguro.3`, alimentada por los subagentes que el mod observa (ver abajo).
 
 ## Estilos de las figuras (versión `1.2.1-seguro.2`)
 
@@ -41,6 +41,17 @@ Las animaciones duran 1 s por ciclo y se atan al reloj, así siguen fluidas aunq
 Si el panel no cambia, abre una sesión nueva. Un valor fuera de `cerveza`, `boxeador` o `cangrejo` vuelve a `cerveza`.
 
 Cambios sobre el original para esto (todos en `register.tsx`, solo de dibujo): importar `hooks/estilos.ts`, leer la opción `estilo`, dibujar la figura en lugar del cangrejo en las filas y en la vista compacta, y correr el texto de la fila a `TX = 64` para dar sitio a la figura.
+
+## Barra sobre el prompt (versión `1.2.1-seguro.3`)
+
+La barra del original (relleno de píxeles, porcentaje y botón ×N) sin depender de savvy-flow: cuenta el **lote actual**, los subagentes desde la última vez que no corría ninguno, por ejemplo `Agents · Tasks 2/3 · 67%`.
+
+- **×N** abre o cierra el panel con un clic (N es el total de subagentes de la sesión).
+- **✕** oculta la barra hasta que arranque otro subagente, que empieza un lote nuevo.
+- A la derecha va la figura del tema en pequeño: la cerveza se llena con el lote; el boxeador salta la cuerda.
+- Si algún día se usa con un flujo que reporte su progreso, la barra muestra ese flujo como el original.
+
+Cambios sobre el original para esto (en `register.tsx` y `types/index.d.ts`, solo de dibujo y estado propio): el hook de la barra usa el lote cuando no hay flujo reportado, `rowSvg` acepta la figura del tema en lugar del cangrejo y ✕ guarda `bandFrom` en el estado del panel.
 
 ## Qué puede hacer el mod
 

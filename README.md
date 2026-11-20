@@ -32,7 +32,8 @@ En la app de escritorio, donde `/plugin` no está disponible: botón **+** junto
 
 ## Uso
 
-- `/agents-info` abre o cierra el panel; `/agents-info open` lo trae al frente. Se abre solo cuando empieza un subagente.
+- **Barra sobre el prompt:** muestra el lote de subagentes en curso (`Agents · Tasks 2/3 · 67%`) con el relleno de píxeles del original. **×N** abre o cierra el panel con un clic; **✕** la oculta hasta que arranque otro subagente.
+- `/agents-info` abre o cierra el panel; `/agents-info open` lo trae al frente. Se abre solo con el primer subagente de la sesión.
 - El tema es uno para todo el panel: `cerveza` (por defecto), `boxeador` o `cangrejo`. Ver [Cambiar de tema](#cambiar-de-tema).
 
 | Tema | Qué indica cada cosa |

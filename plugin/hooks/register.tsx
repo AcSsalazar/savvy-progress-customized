@@ -214,7 +214,44 @@ const fitText = (s: string, size: number, maxW: number): string => {
   return out + '…'
 }
 
-const rowSvg = (f: Flow, W: number, isWorking: boolean): string => {
+// Sin savvy-flow nadie reporta un flujo: la barra cuenta el lote actual, los subagentes
+// desde la última vez que no corría ninguno (y desde que se ocultó con ✕).
+const batchFlow = (list: AgentRun[], from: number): Flow | null => {
+  const sorted = list.filter(a => a.startedAt >= from).sort((a, b) => a.startedAt - b.startedAt)
+  let start = 0
+  let busy = -Infinity
+  sorted.forEach((a, i) => {
+    if (a.startedAt > busy) start = i
+    busy = a.status === 'running' ? Infinity : Math.max(busy, a.endedAt ?? a.startedAt)
+  })
+  const batch = sorted.slice(start)
+  if (!batch.length) return null
+  const done = batch.filter(a => a.status !== 'running').length
+  return { title: tr().pane, total: batch.length, done, running: batch.length - done, phase: 'delegate', isFinished: done === batch.length, tasks: [] }
+}
+
+// La figura de la barra: la del tema en pequeño (la cerveza se llena con el lote); null deja el cangrejo.
+const bandFigure = (list: AgentRun[], f: Flow, W: number, at: number): string | null => {
+  const a = list.find(r => r.status === 'running') ?? list[list.length - 1]
+  const fig = sprite(
+    { type: a?.type ?? 'general-purpose', model: a?.model ?? '', status: f.isFinished ? 'done' : 'running', steps: Math.round(ratio(f) * 20), ctx: 0, order: 0 },
+    estilo, at, { x: isRtl() ? 0 : W - CRAB_W - 4, y: 0, w: CRAB_W + 4, h: H, scale: 0.72, rtl: isRtl(), animate: !f.isFinished },
+  )
+  return fig && SPRITE_CSS + fig
+}
+
+// ✕ en la barra: un flujo reportado se borra como en el original; el lote propio se oculta
+// hasta que arranque otro subagente.
+async function dismissBand($: EngineInterface): Promise<void> {
+  if (await read($, flow)) {
+    await update($, flow, () => null)
+    return
+  }
+  const t = await $.clock.now()
+  await update($, panel, prev => ({ ...prev, bandFrom: t + 1 }))
+}
+
+const rowSvg = (f: Flow, W: number, isWorking: boolean, figure: string | null = null): string => {
   // The title takes what it needs, up to 40% of the row; the bar takes the rest.
   const title = fitText(f.title, 13, Math.max(60, W * 0.4))
   const BAR_X = Math.round(16 + textWidth(title, 13) + 12)
@@ -286,7 +323,7 @@ const rowSvg = (f: Flow, W: number, isWorking: boolean): string => {
 <text x="${pillX + pillW / 2}" y="${BAR_H / 2 + 4}" text-anchor="middle"${rtl ? ' direction="rtl"' : ''} font-family="${FONT}" font-size="11" font-weight="600" fill="#ffffff">${xml(text)}</text>
 </g>
 <text class="m" ${percentAt} font-family="${FONT}" font-size="12.5" font-variant-numeric="tabular-nums">${percent}</text>
-${CRAB_CSS}${crab(rx(W - CRAB_W + 1, crabW), 0, 'other', false, isWorking, 0.8, rtl)}
+${figure ?? `${CRAB_CSS}${crab(rx(W - CRAB_W + 1, crabW), 0, 'other', false, isWorking, 0.8, rtl)}`}
 </svg>`
 }
 
@@ -1077,8 +1114,12 @@ export const register: Register = (on, options) => {
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    const f = await read($, flow)
-    if (f === null || e.props.hasSurvey) return next(e)
+    if (e.props.hasSurvey) return next(e)
+    const list = await read($, agents)
+    const p: Panel = await read($, panel)
+    const at = await read($, now)
+    const f = (await read($, flow)) ?? batchFlow(list, p.bandFrom ?? 0)
+    if (f === null) return next(e)
     // Draw this row with the other mods' bands beneath it. Claude Code's own placeholder ({ type: 'engine' }) is
     // never nested: the desktop drops a band that nests it.
     const drawn = await Promise.resolve(next(e)).catch(() => null)
@@ -1086,7 +1127,6 @@ export const register: Register = (on, options) => {
 
     const ui = $.ui.resolve(e)
     const { Box, Text, Button } = ui
-    const list = await read($, agents)
     const crew = list.length + plannedOf(f, list).length
     const isWorking = list.some(a => a.status === 'running')
     const crewButton = (
@@ -1099,7 +1139,7 @@ export const register: Register = (on, options) => {
         label="✕"
         plain
         role="dismiss"
-        onPress={() => update($, flow, () => null)}
+        onPress={() => void dismissBand($)}
       />
     )
 
@@ -1112,7 +1152,7 @@ export const register: Register = (on, options) => {
       return (
         <Box flexDirection="column">
           <Box flexDirection={isRtl() ? 'row-reverse' : 'row'} alignItems="center" gap={1}>
-            <Svg source={rowSvg(f, width, isWorking)} alt={`${f.title}: ${label(f)}, ${percent}`} width={width} height={H} />
+            <Svg source={rowSvg(f, width, isWorking, bandFigure(list, f, width, at))} alt={`${f.title}: ${label(f)}, ${percent}`} width={width} height={H} />
             {crewButton}
             {dismiss}
           </Box>

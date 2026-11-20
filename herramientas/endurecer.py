@@ -128,6 +128,59 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
     edit(R, "    lang = await detectLang($, options.language)\n",
          "    lang = await detectLang($, options.language)\n    estilo = estiloOf(options.estilo)\n")
 
+    # 11. Barra sobre el prompt sin savvy-flow: el dibujo del original alimentado por el lote
+    #     de subagentes observado, con su botón ×N y ✕ (que la oculta hasta el siguiente lote).
+    edit("types/index.d.ts", "  autoOpenedFor: string\n}",
+         "  autoOpenedFor: string\n  /** Desde cuándo cuenta la barra propia: ✕ la oculta hasta el siguiente lote. */\n  bandFrom?: number\n}")
+    edit(R, "const rowSvg = (f: Flow, W: number, isWorking: boolean): string => {",
+         "// Sin savvy-flow nadie reporta un flujo: la barra cuenta el lote actual, los subagentes\n"
+         "// desde la última vez que no corría ninguno (y desde que se ocultó con ✕).\n"
+         "const batchFlow = (list: AgentRun[], from: number): Flow | null => {\n"
+         "  const sorted = list.filter(a => a.startedAt >= from).sort((a, b) => a.startedAt - b.startedAt)\n"
+         "  let start = 0\n"
+         "  let busy = -Infinity\n"
+         "  sorted.forEach((a, i) => {\n"
+         "    if (a.startedAt > busy) start = i\n"
+         "    busy = a.status === 'running' ? Infinity : Math.max(busy, a.endedAt ?? a.startedAt)\n"
+         "  })\n"
+         "  const batch = sorted.slice(start)\n"
+         "  if (!batch.length) return null\n"
+         "  const done = batch.filter(a => a.status !== 'running').length\n"
+         "  return { title: tr().pane, total: batch.length, done, running: batch.length - done, phase: 'delegate', isFinished: done === batch.length, tasks: [] }\n"
+         "}\n\n"
+         "// La figura de la barra: la del tema en pequeño (la cerveza se llena con el lote); null deja el cangrejo.\n"
+         "const bandFigure = (list: AgentRun[], f: Flow, W: number, at: number): string | null => {\n"
+         "  const a = list.find(r => r.status === 'running') ?? list[list.length - 1]\n"
+         "  const fig = sprite(\n"
+         "    { type: a?.type ?? 'general-purpose', model: a?.model ?? '', status: f.isFinished ? 'done' : 'running', steps: Math.round(ratio(f) * 20), ctx: 0, order: 0 },\n"
+         "    estilo, at, { x: isRtl() ? 0 : W - CRAB_W - 4, y: 0, w: CRAB_W + 4, h: H, scale: 0.72, rtl: isRtl(), animate: !f.isFinished },\n"
+         "  )\n"
+         "  return fig && SPRITE_CSS + fig\n"
+         "}\n\n"
+         "// ✕ en la barra: un flujo reportado se borra como en el original; el lote propio se oculta\n"
+         "// hasta que arranque otro subagente.\n"
+         "async function dismissBand($: EngineInterface): Promise<void> {\n"
+         "  if (await read($, flow)) {\n"
+         "    await update($, flow, () => null)\n"
+         "    return\n"
+         "  }\n"
+         "  const t = await $.clock.now()\n"
+         "  await update($, panel, prev => ({ ...prev, bandFrom: t + 1 }))\n"
+         "}\n\n"
+         "const rowSvg = (f: Flow, W: number, isWorking: boolean, figure: string | null = null): string => {")
+    edit(R, "${CRAB_CSS}${crab(rx(W - CRAB_W + 1, crabW), 0, 'other', false, isWorking, 0.8, rtl)}",
+         "${figure ?? `${CRAB_CSS}${crab(rx(W - CRAB_W + 1, crabW), 0, 'other', false, isWorking, 0.8, rtl)}`}")
+    edit(R, "    const f = await read($, flow)\n    if (f === null || e.props.hasSurvey) return next(e)\n",
+         "    if (e.props.hasSurvey) return next(e)\n"
+         "    const list = await read($, agents)\n"
+         "    const p: Panel = await read($, panel)\n"
+         "    const at = await read($, now)\n"
+         "    const f = (await read($, flow)) ?? batchFlow(list, p.bandFrom ?? 0)\n"
+         "    if (f === null) return next(e)\n")
+    edit(R, "    const list = await read($, agents)\n    const crew = list.length", "    const crew = list.length")
+    edit(R, "        onPress={() => update($, flow, () => null)}\n", "        onPress={() => void dismissBand($)}\n")
+    edit(R, "source={rowSvg(f, width, isWorking)}", "source={rowSvg(f, width, isWorking, bandFigure(list, f, width, at))}")
+
 
 def construir(original: Path, propios: Path, destino: Path, estilos: bool) -> None:
     if destino.exists():

@@ -808,6 +808,24 @@ export const register: Register = (on, options) => {
         const list = await read($, agents)
         if (!list.some(a => a.status === 'running')) return
         const at = await $.clock.now()
+        // El motor sabe con certeza qué subagentes terminaron; solo se consulta mientras alguno corre.
+        let infos: { id: string; status?: string; taskStatus?: string }[] = []
+        try {
+          infos = await $.agent.list()
+        } catch {
+          // Sin lista no se cambia nada: quedan los eventos de fin de turno.
+        }
+        const byId = new Map(infos.map(x => [x.id, x]))
+        const endOf = (s: string | undefined): AgentRun['status'] | null =>
+          s === 'completed' ? 'done' : s === 'failed' || s === 'killed' ? 'failed' : null
+        if (list.some(a => a.status === 'running' && a.agentId && endOf(byId.get(a.agentId)?.status ?? byId.get(a.agentId)?.taskStatus)))
+          await update($, agents, l =>
+            l.map(a => {
+              const info = a.status === 'running' && a.agentId ? byId.get(a.agentId) : undefined
+              const ended = info ? endOf(info.status) ?? endOf(info.taskStatus) : null
+              return ended ? { ...a, status: ended, endedAt: at } : a
+            }),
+          )
         await update($, now, () => at)
       })()
     })

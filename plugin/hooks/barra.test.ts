@@ -152,3 +152,15 @@ for (const [historial, keepsOld] of [['sesion', true], ['lote', false]] as const
     if (keepsOld) expect(texts).toContain('Lote viejo')
     else expect(texts).not.toContain('Lote viejo')
   })
+
+test('fin: si el motor lista el subagente como completado, la fila termina aunque no llegue el fin de turno', async ($, on) => {
+  const clock = engine(on, [], [])
+  on('agent.list', () => ({ value: [{ id: 'a1', status: 'completed', taskStatus: 'completed', description: 'Uno', type: 'Explore', kind: 'local_agent', label: 'Uno', startTime: 0, cwd: '/', tokenCount: 0, tokenSamples: [], hasRow: true }] }) as never)
+  await $.session.start({ source: 'startup', cwd: '/repo', surface: 'desktop', isInteractive: true } as never)
+  await spawn($, 'Uno')
+  await clock.advance(1100)
+  const ui = await $.ui.mount({ plugin: PLUGIN, surface: 'terminal', component: 'Pane', requestId: 'savvy-agents', props: pane })
+  const labels = (await ui.findAll({ type: 'Button' })).map(b => String(b.props.label))
+  await ui.unmount()
+  expect(labels.some(l => l.includes('Finished · 1'))).toBe(true)
+})

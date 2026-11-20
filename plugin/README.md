@@ -75,7 +75,7 @@ Se cambian como el tema, por ejemplo `cmd /c 'echo {"barra":"no"}| claude plugin
 Solo lo que expone la API de Claude Code; un mod no tiene `fetch`, Node ni DOM. Este usa:
 
 - **Eventos (solo observa):** inicio de sesión, su comando, llamadas a la herramienta Agent, inicio de subagentes, pasos y fin de turnos, y dibujo.
-- **Llamadas:** reloj, registrar `/agents-info`, abrir y cerrar su panel, su propio estado, leer la configuración (solo usa `language`) y las variables `LANG`, `LC_ALL` y `LC_MESSAGES`.
+- **Llamadas:** reloj, registrar `/agents-info`, abrir y cerrar su panel, su propio estado, leer la configuración (solo usa `language`) las variables `LANG`, `LC_ALL` y `LC_MESSAGES` y, mientras algún subagente corre, `$.agent.list` (solo lectura) para marcar como terminado al que el motor ya dio por completado (versión `1.2.1-seguro.8`).
 - **Sin acceso a:** red, archivos, procesos, modelos, telemetría ni registro de herramientas.
 
 El costo es una estimación con la tabla de precios del autor (`PRICES` en `hooks/register.tsx`, precios de lista al 2026-10-10), no la factura.

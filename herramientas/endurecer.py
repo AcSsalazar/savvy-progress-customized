@@ -210,6 +210,30 @@ def aplicar(dst: Path, estilos: bool = True) -> None:
          "const agentSvg = (W: number, a: AgentRun, at: number, order = 0): string => {")
     edit(R, "  const tier = tierOf(a.type)\n  const color = colorOf(tier)\n", "  const tier = tierOf(a.type)\n  const color = rowColor(a)\n")
     edit(R, "      const tier = tierOf(a.type)\n      const color = colorOf(tier)\n", "      const tier = tierOf(a.type)\n      const color = rowColor(a)\n")
+    # 15. El fin de cada agente, desde la lista del motor ($.agent.list, solo lectura): si el
+    #     evento de fin de turno no llega, la fila igual pasa a terminada y su barra al 100 %.
+    edit(R, "        const list = await read($, agents)\n        if (!list.some(a => a.status === 'running')) return\n        const at = await $.clock.now()\n",
+         "        const list = await read($, agents)\n"
+         "        if (!list.some(a => a.status === 'running')) return\n"
+         "        const at = await $.clock.now()\n"
+         "        // El motor sabe con certeza qué subagentes terminaron; solo se consulta mientras alguno corre.\n"
+         "        let infos: { id: string; status?: string; taskStatus?: string }[] = []\n"
+         "        try {\n"
+         "          infos = await $.agent.list()\n"
+         "        } catch {\n"
+         "          // Sin lista no se cambia nada: quedan los eventos de fin de turno.\n"
+         "        }\n"
+         "        const byId = new Map(infos.map(x => [x.id, x]))\n"
+         "        const endOf = (s: string | undefined): AgentRun['status'] | null =>\n"
+         "          s === 'completed' ? 'done' : s === 'failed' || s === 'killed' ? 'failed' : null\n"
+         "        if (list.some(a => a.status === 'running' && a.agentId && endOf(byId.get(a.agentId)?.status ?? byId.get(a.agentId)?.taskStatus)))\n"
+         "          await update($, agents, l =>\n"
+         "            l.map(a => {\n"
+         "              const info = a.status === 'running' && a.agentId ? byId.get(a.agentId) : undefined\n"
+         "              const ended = info ? endOf(info.status) ?? endOf(info.taskStatus) : null\n"
+         "              return ended ? { ...a, status: ended, endedAt: at } : a\n"
+         "            }),\n"
+         "          )\n")
     edit(R, "source={rowSvg(f, width, isWorking)}", "source={rowSvg(f, width, isWorking, bandFigure(list, f, width, at))}")
 
 
